@@ -12,7 +12,7 @@ def read_sql(select_sql):
         df = pd.read_sql(sql=select_sql, con=self.con)
         pprint(df)
 
-def create_table():
+def create_book_table():
     con = psycopg2.connect(host='books_database',\
                             port='5432',\
                             dbname='ogaken5',\
@@ -39,6 +39,36 @@ def create_table():
                     Release_date CHAR(8),
                     CoverPicture VARCHAR(1024),
                     PRIMARY KEY (ISBN)
+                );
+                '''
+
+            # SQL を実行し、テーブル作成
+            cur.execute(sql)
+
+        # コミットし、変更を確定する
+        con.commit()
+
+    # 接続を閉じる
+    con.close()
+
+def create_author_table():
+    con = psycopg2.connect(host='books_database',\
+                            port='5432',\
+                            dbname='ogaken5',\
+                            user='ogaken5',\
+                            password='books',\
+                            )
+    
+
+    with con:
+        con.set_client_encoding('utf-8') 
+        with con.cursor() as cur:
+        # テーブルを作成する SQL を準備
+            sql = '''
+                CREATE TABLE authors  (
+                    Author_num CHAR(10),
+                    Author VARCHAR(1024),
+                    PRIMARY KEY (Author_num)
                 );
                 '''
 
