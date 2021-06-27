@@ -1,6 +1,8 @@
 from pprint import pprint
 import bookapi
 import access_postgresql
+import test 
+import sys
 
 def main():
     rakuten_id = bookapi.RakutenBookApi('1091376391585393106')
@@ -55,6 +57,7 @@ def access_insert_sql(df):
     postgres.con.commit()
 '''
 
+'''
 if __name__ == '__main__':
     df = main()
     #-----openbdの取得負荷を減らすために-----
@@ -76,4 +79,8 @@ if __name__ == '__main__':
     #データ保存
     
     #sql_insert.test_create_table()
-  
+'''
+
+if __name__ == '__main__':
+    #test.confirm()
+    pprint(sys.path)
