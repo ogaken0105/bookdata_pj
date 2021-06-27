@@ -1,3 +1,5 @@
+###このファイルは使用しません。
+
 import os
 import psycopg2
 from pprint import pprint

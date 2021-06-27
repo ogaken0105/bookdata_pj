@@ -1,7 +1,18 @@
 import psycopg2
 from pprint import pprint
 
-def test_create_table():
+def read_sql(select_sql):
+    con = psycopg2.connect(host='books_database',\
+                            port='5432',\
+                            dbname='ogaken5',\
+                            user='ogaken5',\
+                            password='books',\
+                            )
+    with con.cursor() as cur:
+        df = pd.read_sql(sql=select_sql, con=self.con)
+        pprint(df)
+
+def create_table():
     con = psycopg2.connect(host='books_database',\
                             port='5432',\
                             dbname='ogaken5',\
@@ -9,8 +20,6 @@ def test_create_table():
                             password='books',\
                             )
     
-
-
 
     with con:
         con.set_client_encoding('utf-8') 
@@ -42,7 +51,7 @@ def test_create_table():
     # 接続を閉じる
     con.close()
 
-def test_insert_sql(df):
+def insert_data(df):
     #コンテナ同士を接続しているので、hostnameはコンテナ名を入力する。localhostじゃ通じない
     #dbnameを未指定のまま、databaseをつくると、ユーザー名のデータベスがつくられるので、ユーザー名を入力している
     con = psycopg2.connect(host='books_database',\
@@ -75,12 +84,6 @@ def test_insert_sql(df):
                 description = book_data[8]
                 release_date = book_data[9]
                 coverpicture = book_data[10]
-                
-                print('----')
-                print(genre_taget)
-                print(genre_category)
-                print(genre_content_code)
-                print('----')
 
                 #Noneが文字列で入ってしまっている
                 '''
