@@ -25,7 +25,7 @@ create_author_table_sql =  '''
                 '''
 
 
-def make_insert_books_sql_sentence(df):
+def make_insert_sql_to_books_table(df):
     books_dict = df.to_dict(orient='records')
     for book in books_dict:
 

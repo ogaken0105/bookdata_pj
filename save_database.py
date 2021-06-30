@@ -1,4 +1,6 @@
-from access_postgresql import con, read_sql, operate_database, create_author_table_sql,make_insert_books_sql_sentence
+from postgresql_setting import con
+from read_database import read_sql
+from make_sql_sentence import make_insert_sql_to_books_table
 from pprint import pprint
 import bookapi
 import psycopg2
