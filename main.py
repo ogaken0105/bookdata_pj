@@ -83,4 +83,4 @@ if __name__ == '__main__':
 
 if __name__ == '__main__':
     #test.confirm()
-    pprint(sys.path)
+    access_postgresql.create_author_table()

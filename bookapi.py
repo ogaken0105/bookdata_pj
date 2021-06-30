@@ -152,19 +152,42 @@ class OpenbdApi(Api):
     def make_book_info_df(self, isbn_list:list) -> pd.DataFrame:
 
         all_books_df = pd.DataFrame(
-        columns=['ISBN','Series_num','GenreCode','Genre_Target','Genre_Category','Genre_Contents_code','Title','Author','Description','Release_date','CoverPicture']
+        columns=['ISBN','Series_num',\
+                'GenreCode',\
+                'Genre_Target',\
+                'Genre_Category',\
+                'Genre_Contents_code',\
+                'Title',\
+                'Author',\
+                'Publiser',\
+                'publisher_id_type19',\
+                'publisher_id_type24',\
+                'Description',\
+                'Release_date',\
+                'CoverPicture'\
+                ]
         )
     
         for isbn in isbn_list:
             try:
                 response_in_json = self.request(isbn=isbn)
 
-                #取得したopenBDのAPI結果の中で、必要なものだけデータフレームに保存
-                #########全部tryにしよう！一部だけtryとかにして、取得できなかったものだけ飛ばしたい
+                #----取得したopenBDのAPI結果の中で、必要なものだけデータフレームに保存----
+                #----全部tryにしよう！一部だけtryとかにして、取得できなかったものだけ飛ばしたい----
                 isbn_num = response_in_json[0]['onix']['RecordReference']
                 Title = response_in_json[0]['onix']['DescriptiveDetail']['TitleDetail']['TitleElement']['TitleText']['content']
                 Author = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['content']
-            
+                publisher = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['content']
+                
+                imprintIdentifier = response_in_json[0]['onix']['PublishingDetail']['Imprint']['ImprintIdentifier']
+                for identifier in imprintIdentifier:
+                    if identifier['ImprintIDType'] == '19':
+                        publisher_id_type19 = identifer['IDValue']
+                    elif identifier['ImprintIDType'] == '24':
+                        publisher_id_type24 = identifer['IDValue']
+                
+                #----authorに関する情報をもっと取得する-----
+
                 #説明文
                 try:
                     Description = response_in_json[0]['onix']['CollateralDetail']['TextContent'][0]['Text']
@@ -205,6 +228,9 @@ class OpenbdApi(Api):
                     'Genre_Contents_code': Genre_Contents_code,
                     'Title': Title,
                     'Author': Author,
+                    'Publisher': publisher,
+                    'publisher_id_type19' : publisher_id_type19,
+                    'publisher_id_type24' : publisher_id_type24,
                     'Description': Description,
                     'Release_date': Release_date,
                     'CoverPicture': CoverPicture,
@@ -213,9 +239,3 @@ class OpenbdApi(Api):
                 pass
 
         return all_books_df  
-
-
-#実行部分を書く
-#rakuten_apiからlist取得
-#openbdでdfに変換
-#別のファイルにしよ
