@@ -11,7 +11,7 @@ class Api():
             apiのエンドポイントURLを入力してください。
         -----------------
         '''
-        self.endpoint_url = endpoint_url
+        self._endpoint_url = endpoint_url
 
     def request(self, **kwarg):
         '''
@@ -27,8 +27,8 @@ class Api():
             APIからの返答をjson形式で返します。
         -----------------
         '''
-        self.parameters = kwarg
-        response = requests.get(self.endpoint_url, params=self.parameters)
+        self._parameters = kwarg
+        response = requests.get(self._endpoint_url, params=self._parameters)
         return response.json()
 
 
@@ -44,7 +44,7 @@ class RakutenBookApi(Api):
         '''
 
         super().__init__('https://app.rakuten.co.jp/services/api/IchibaItem/Ranking/20170628?format=json')
-        self.application_id = application_id
+        self.__application_id = application_id
 
     def request_bookrank(self, genre_id, page_count):
 
@@ -65,17 +65,18 @@ class RakutenBookApi(Api):
 
         Returns
         -----------------
-        book_item : generator
-            ランキングに掲載されている書籍情報を、generateします。
-            １ランクずつ返します。
+
         -----------------
         '''
 
         for page_num in range(1,page_count+1):
-            response_in_json = self.request(genreId=genre_id, applicationId=self.application_id, page=page_num)
-            for book_data in response_in_json['Items']:
-                book_item = book_data['Item']
-                yield book_item
+            response_in_json = self.request(genreId=genre_id, applicationId=self.__application_id, page=page_num)
+            yield response_in_json
+    
+    def process_response_items(self, response_in_json):
+        for book_data in response_in_json['Items']:
+            book_item = book_data['Item']
+            yield book_item
 
     def make_isbn_list(self, gen_book_item:'generator') -> 'list':
         isbn_list =[]
@@ -91,6 +92,7 @@ class RakutenBookApi(Api):
 
         return isbn_list
 
+    # 使っていない
     def make_bookrank_df(self, gen_book_item):
         '''
         Parameters
@@ -159,6 +161,7 @@ class OpenbdApi(Api):
                 'Genre_Contents_code',\
                 'Title',\
                 'Author',\
+                'author_collationkey',\
                 'Publiser',\
                 'publisher_id_type19',\
                 'publisher_id_type24',\
@@ -175,9 +178,11 @@ class OpenbdApi(Api):
                 #----取得したopenBDのAPI結果の中で、必要なものだけデータフレームに保存----
                 #----全部tryにしよう！一部だけtryとかにして、取得できなかったものだけ飛ばしたい----
                 isbn_num = response_in_json[0]['onix']['RecordReference']
-                Title = response_in_json[0]['onix']['DescriptiveDetail']['TitleDetail']['TitleElement']['TitleText']['content']
-                Author = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['content']
-                publisher = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['content']
+                title = response_in_json[0]['onix']['DescriptiveDetail']['TitleDetail']['TitleElement']['TitleText']['content']
+                #著者が一人ではない場合どうする？
+                author = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['content']
+                author_collationkey = response_in_json[0]['onix']['DescriptiveDetail']['Contributor'][0]['PersonName']['collationkey']
+                publisher = response_in_json[0]['onix']['PublishingDetail']['Imprint']['ImprintName']
                 
                 imprintIdentifier = response_in_json[0]['onix']['PublishingDetail']['Imprint']['ImprintIdentifier']
                 for identifier in imprintIdentifier:
@@ -187,7 +192,6 @@ class OpenbdApi(Api):
                         publisher_id_type24 = identifer['IDValue']
                 
                 #----authorに関する情報をもっと取得する-----
-
                 #説明文
                 try:
                     Description = response_in_json[0]['onix']['CollateralDetail']['TextContent'][0]['Text']
@@ -226,8 +230,9 @@ class OpenbdApi(Api):
                     'Genre_Target': Genre_Target,
                     'Genre_Category': Genre_Category,
                     'Genre_Contents_code': Genre_Contents_code,
-                    'Title': Title,
-                    'Author': Author,
+                    'Title': title,
+                    'Author': author,
+                    'author_collationkey': author_collationkey,
                     'Publisher': publisher,
                     'publisher_id_type19' : publisher_id_type19,
                     'publisher_id_type24' : publisher_id_type24,

@@ -17,11 +17,9 @@ access_postgresql.insert_author(df)
 # 登録がない場合、採番する
 
 def author_numbering(author_name):
-
+    pass
     # データベースから既存のデータを取得
     # 既存のデータにauthor_nameが含まれているか確認（authorsには、出版社番号とかも入れたほうがいい）
     # 含まれていなかったら、新規author_numを発行
     #  発行した新規author_numを採番
     #  データベースに登録
-
-
